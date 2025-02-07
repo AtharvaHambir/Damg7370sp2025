@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "damg7370adfsp2025"
+		},
+		"Snowflake1_password": {
+			"value": ""
+		},
+		"AzureDataLakeStorage_LS_properties_typeProperties_url": {
+			"value": "https://damg7370sp2025.dfs.core.windows.net/"
+		},
+		"AzureKeyVault_LS_properties_typeProperties_baseUrl": {
+			"value": "https://damg7370kvsp2025.vault.azure.net/"
+		},
+		"Snowflake1_properties_typeProperties_database": {
+			"value": "damg7370db"
+		},
+		"Snowflake1_properties_typeProperties_role": {
+			"value": "damg7370r"
+		},
+		"stgblobspring2025_sasUri": {
+			"value": ""
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
