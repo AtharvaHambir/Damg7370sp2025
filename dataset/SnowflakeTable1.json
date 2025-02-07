@@ -5,11 +5,21 @@
 			"referenceName": "Snowflake1",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"schema_name": {
+				"type": "string",
+				"defaultValue": "DAMG7370SCH"
+			},
+			"table_name": {
+				"type": "string",
+				"defaultValue": "PET_LICENSE_STAGE"
+			}
+		},
 		"annotations": [],
 		"type": "SnowflakeV2Table",
 		"schema": [],
 		"typeProperties": {
-			"schema": "damg7370sch",
+			"schema": "DAMG7370SCH",
 			"table": "PET_LICENSE_STAGE"
 		}
 	}

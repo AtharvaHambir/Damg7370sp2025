@@ -3,11 +3,11 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "parquet_to_snowflake",
+				"name": "parquettosnowflake",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "tsv_to_parquet",
+						"activity": "csvtoparquet",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -24,9 +24,25 @@
 				"typeProperties": {
 					"source": {
 						"type": "ParquetSource",
+						"additionalColumns": [
+							{
+								"name": "di_job_id",
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "di_load_dt",
+								"value": {
+									"value": "@utcNow()",
+									"type": "Expression"
+								}
+							}
+						],
 						"storeSettings": {
 							"type": "AzureBlobFSReadSettings",
-							"recursive": false,
+							"recursive": true,
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
@@ -44,7 +60,8 @@
 						"linkedServiceName": {
 							"referenceName": "stgblobspring2025",
 							"type": "LinkedServiceReference"
-						}
+						},
+						"path": ""
 					}
 				},
 				"inputs": [
@@ -62,12 +79,16 @@
 				"outputs": [
 					{
 						"referenceName": "SnowflakeTable1",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"schema_name": "DAMG7370SCH",
+							"table_name": "PET_LICENSE_STAGE"
+						}
 					}
 				]
 			},
 			{
-				"name": "tsv_to_parquet",
+				"name": "csvtoparquet",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -111,7 +132,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "DelimitedText1",
+						"referenceName": "DelimitedText2",
 						"type": "DatasetReference"
 					}
 				],
