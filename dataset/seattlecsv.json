@@ -1,0 +1,68 @@
+{
+	"name": "seattlecsv",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage_LS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Filename": {
+				"type": "string",
+				"defaultValue": "seattlecsv.txt"
+			},
+			"FileDelimiter": {
+				"type": "string",
+				"defaultValue": "|"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().Filename",
+					"type": "Expression"
+				},
+				"fileSystem": "bronze"
+			},
+			"columnDelimiter": {
+				"value": "@dataset().FileDelimiter",
+				"type": "Expression"
+			},
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "LicenseIssueDate",
+				"type": "String"
+			},
+			{
+				"name": "LicenseNumber",
+				"type": "String"
+			},
+			{
+				"name": "AnimalsName",
+				"type": "String"
+			},
+			{
+				"name": "Species",
+				"type": "String"
+			},
+			{
+				"name": "PrimaryBreed",
+				"type": "String"
+			},
+			{
+				"name": "SecondaryBreed",
+				"type": "String"
+			},
+			{
+				"name": "ZIPCode",
+				"type": "String"
+			}
+		]
+	}
+}

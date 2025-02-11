@@ -1,0 +1,39 @@
+{
+	"name": "seattle_pet_lic_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "seattlecsv",
+						"type": "DatasetReference"
+					},
+					"name": "readcsvfile"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          LicenseIssueDate as string,",
+				"          LicenseNumber as string,",
+				"          AnimalsName as string,",
+				"          Species as string,",
+				"          PrimaryBreed as string,",
+				"          SecondaryBreed as string,",
+				"          ZIPCode as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> readcsvfile",
+				"readcsvfile derive(LicenseIssueDate = toDate(LicenseIssueDate, 'YYYY MM DD'),",
+				"          SecondaryBreed = iifNull(SecondaryBreed,'Unknown')) ~> derivedColumn1"
+			]
+		}
+	}
+}
