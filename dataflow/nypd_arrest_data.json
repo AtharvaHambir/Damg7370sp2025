@@ -1,0 +1,61 @@
+{
+	"name": "nypd_arrest_data",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "nypd",
+						"type": "DatasetReference"
+					},
+					"name": "nypdarrestdata"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ARREST_KEY as string,",
+				"          ARREST_DATE as string,",
+				"          PD_CD as integer,",
+				"          PD_DESC as string,",
+				"          KY_CD as integer,",
+				"          OFNS_DESC as string,",
+				"          LAW_CODE as string,",
+				"          LAW_CAT_CD as string,",
+				"          ARREST_BORO as string,",
+				"          ARREST_PRECINCT as integer,",
+				"          JURISDICTION_CODE as integer,",
+				"          AGE_GROUP as string,",
+				"          PERP_SEX as string,",
+				"          PERP_RACE as string,",
+				"          X_COORD_CD as integer,",
+				"          Y_COORD_CD as integer,",
+				"          Latitude as float,",
+				"          Longitude as float,",
+				"          {New Georeferenced Column} as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> nypdarrestdata",
+				"nypdarrestdata derive(PD_CD = iif(isNull(PD_CD), -1, PD_CD),",
+				"          KY_CD = iif(isNull(KY_CD), -1, KY_CD),",
+				"          LAW_CAT_CD = iif(isNull(LAW_CAT_CD), 'MISSING', LAW_CAT_CD),",
+				"          PD_DESC = iif(equals(PD_DESC, '(null)'), 'MISSING', PD_DESC),",
+				"          OFNS_DESC = iif(equals(OFNS_DESC, '(null)'), 'MISSING', OFNS_DESC),",
+				"          Latitude = iif(isNull(Latitude), -1.0, Latitude),",
+				"          Longitude = iif(isNull(Longitude), -1.0, Longitude),",
+				"          {New Georeferenced Column} = iif(isNull({New Georeferenced Column}), 'MISSING', {New Georeferenced Column})) ~> derivedColumn1",
+				"derivedColumn1 derive(ARREST_DATE = toDate(ARREST_DATE, 'MM/dd/yyyy')) ~> derivedColumn2"
+			]
+		}
+	}
+}
