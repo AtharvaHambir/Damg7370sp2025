@@ -1,0 +1,27 @@
+{
+	"name": "datedim_SnowflakeTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Snowflake1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [
+			{
+				"name": "RN_ID",
+				"type": "NUMBER",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "DT",
+				"type": "DATE"
+			}
+		],
+		"typeProperties": {
+			"schema": "DAMG7370SCH",
+			"table": "DATE_DIM"
+		}
+	}
+}
