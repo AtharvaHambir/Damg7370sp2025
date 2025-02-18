@@ -75,7 +75,8 @@
 				"          STATE_ABBR = state_abbr,",
 				"          ZIP = zipcode,",
 				"          DI_JOB_ID,",
-				"          DI_LOAD_DATE = DI_CREATED_DATE",
+				"          DI_LOAD_DATE = DI_CREATED_DATE,",
+				"          LOCATION_SK = SK_ID",
 				"     )) ~> sinkLocationDim"
 			]
 		}
