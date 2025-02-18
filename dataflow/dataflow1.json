@@ -19,15 +19,7 @@
 					"name": "source2"
 				}
 			],
-			"sinks": [
-				{
-					"dataset": {
-						"referenceName": "breeddim_SnowflakeTable",
-						"type": "DatasetReference"
-					},
-					"name": "sink1"
-				}
-			],
+			"sinks": [],
 			"transformations": [
 				{
 					"name": "join1"
@@ -79,28 +71,7 @@
 				"     stepValue: 1L) ~> surrogateKey1",
 				"surrogateKey1 derive(BREED_SK = MAXBREEDSK+ROW_NUM,",
 				"          DI_CREATED_DT = toString(currentDate(), 'yyy-MM-dd'),",
-				"          DI_JOB_ID = uuid()) ~> derivedColumn1",
-				"derivedColumn1 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     input(",
-				"          BREED_SK as string,",
-				"          SPECIES_NAME as string,",
-				"          PRIMARY_SPECIES_NAME as string,",
-				"          SECONDARY_BREED_NAME as string,",
-				"          DI_JOB_ID as string,",
-				"          DI_LOAD_DT as string",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
-				"     upsertable:false,",
-				"     format: 'table',",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     stageInsert: true,",
-				"     mapColumn(",
-				"          DI_JOB_ID",
-				"     )) ~> sink1"
+				"          DI_JOB_ID = uuid()) ~> derivedColumn1"
 			]
 		}
 	}
