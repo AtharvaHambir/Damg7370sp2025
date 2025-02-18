@@ -99,12 +99,7 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     stageInsert: true,",
 				"     mapColumn(",
-				"          BREED_SK,",
-				"          SPECIES_NAME = SPECIES,",
-				"          PRIMARY_SPECIES_NAME = PRIMARY_BREED,",
-				"          SECONDARY_BREED_NAME = SECONDARY_BREED,",
-				"          DI_JOB_ID,",
-				"          DI_LOAD_DT = DI_CREATED_DT",
+				"          DI_JOB_ID",
 				"     )) ~> sink1"
 			]
 		}
