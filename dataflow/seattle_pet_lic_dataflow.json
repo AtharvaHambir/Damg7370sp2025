@@ -6,19 +6,40 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "seattlecsv",
+						"referenceName": "ds_petlicdata",
 						"type": "DatasetReference"
 					},
 					"name": "readcsvfile"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "pet_lic_snowflake",
+						"type": "DatasetReference"
+					},
+					"name": "sinkSnowflake"
+				},
+				{
+					"dataset": {
+						"referenceName": "speciesdimSnowflake",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
-					"name": "derivedColumn1"
+					"name": "transposecolumns"
+				},
+				{
+					"name": "pickrequiredcolumns"
 				}
 			],
 			"scriptLines": [
+				"parameters{",
+				"     Job_Id as string (uuid())",
+				"}",
 				"source(output(",
 				"          LicenseIssueDate as string,",
 				"          LicenseNumber as string,",
@@ -31,8 +52,84 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> readcsvfile",
-				"readcsvfile derive(LicenseIssueDate = toDate(LicenseIssueDate, 'YYYY MM DD'),",
-				"          SecondaryBreed = iifNull(SecondaryBreed,'Unknown')) ~> derivedColumn1"
+				"readcsvfile derive(LicenseIssueDate = toDate(LicenseIssueDate, 'MMMM dd yyyy'),",
+				"          SecondaryBreed = iifNull(SecondaryBreed,'Unknown'),",
+				"          ZIPCode = lpad(toString((ZIPCode)),5,'0'),",
+				"          Species = upper(Species),",
+				"          LicenseNumber = toInteger(translate((LicenseNumber),'S','')),",
+				"          AnimalsName = translate(AnimalsName,'()[]',''),",
+				"          Job_Id = $Job_Id,",
+				"          Job_load_date = currentDate()) ~> transposecolumns",
+				"transposecolumns select(mapColumn(",
+				"          LicenseIssueDate,",
+				"          LicenseNumber,",
+				"          AnimalsName,",
+				"          Species,",
+				"          PrimaryBreed,",
+				"          SecondaryBreed,",
+				"          ZIPCode,",
+				"          Job_Id,",
+				"          Job_load_date",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> pickrequiredcolumns",
+				"pickrequiredcolumns sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          LICENSE_ISSUE_DATE as string,",
+				"          LICENSE_NUMBER as string,",
+				"          ANIMAL_NAME as string,",
+				"          SPECIES as string,",
+				"          PRIMARY_BREED as string,",
+				"          SECONDARY_BREED as string,",
+				"          ZIP_CODE as string,",
+				"          DI_JOB_ID as string,",
+				"          DI_LOAD_DT as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     stageInsert: true,",
+				"     mapColumn(",
+				"          LICENSE_ISSUE_DATE = LicenseIssueDate,",
+				"          LICENSE_NUMBER = LicenseNumber,",
+				"          ANIMAL_NAME = AnimalsName,",
+				"          SPECIES = Species,",
+				"          PRIMARY_BREED = PrimaryBreed,",
+				"          SECONDARY_BREED = SecondaryBreed,",
+				"          ZIP_CODE = ZIPCode,",
+				"          DI_JOB_ID = Job_Id,",
+				"          DI_LOAD_DT = Job_load_date",
+				"     )) ~> sinkSnowflake",
+				"pickrequiredcolumns sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          BREED_SK as string,",
+				"          SPECIES_NAME as string,",
+				"          PRIMARY_SPECIES_NAME as string,",
+				"          SECONDARY_BREED_NAME as string,",
+				"          DI_JOB_ID as string,",
+				"          DI_LOAD_DT as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true,",
+				"     mapColumn(",
+				"          SPECIES_NAME = Species,",
+				"          PRIMARY_SPECIES_NAME = PrimaryBreed,",
+				"          SECONDARY_BREED_NAME = SecondaryBreed,",
+				"          DI_JOB_ID = Job_Id,",
+				"          DI_LOAD_DT = Job_load_date",
+				"     )) ~> sink1"
 			]
 		}
 	}
