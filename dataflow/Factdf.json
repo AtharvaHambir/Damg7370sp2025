@@ -1,15 +1,22 @@
 {
-	"name": "FACTdf",
+	"name": "Factdf",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
 				{
 					"dataset": {
+						"referenceName": "pet_lic_snowflake",
+						"type": "DatasetReference"
+					},
+					"name": "LICENSESTAGE"
+				},
+				{
+					"dataset": {
 						"referenceName": "ds_LocationDim",
 						"type": "DatasetReference"
 					},
-					"name": "LOCATIONDIM"
+					"name": "locationDim"
 				},
 				{
 					"dataset": {
@@ -20,49 +27,48 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "pet_lic_snowflake",
-						"type": "DatasetReference"
-					},
-					"name": "STAGE"
-				},
-				{
-					"dataset": {
-						"referenceName": "datedim_SnowflakeTable",
+						"referenceName": "datedim_factdf",
 						"type": "DatasetReference"
 					},
 					"name": "DATEDIM"
+				},
+				{
+					"name": "source1"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "factdf_snowflake",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "join1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "join3"
+				},
+				{
+					"name": "join4"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "derivedColumn1"
 				}
 			],
 			"scriptLines": [
-				"source(output(",
-				"          LOCATION_SK as string,",
-				"          CITY as string,",
-				"          STATE as string,",
-				"          STATE_ABBR as string,",
-				"          ZIP as string,",
-				"          DI_JOB_ID as string,",
-				"          DI_LOAD_DATE as string",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     format: 'table') ~> LOCATIONDIM",
-				"source(output(",
-				"          BREED_SK as string,",
-				"          SPECIES_NAME as string,",
-				"          PRIMARY_SPECIES_NAME as string,",
-				"          SECONDARY_BREED_NAME as string,",
-				"          DI_JOB_ID as string,",
-				"          DI_LOAD_DT as string",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     format: 'table') ~> BREEDDIM",
 				"source(output(",
 				"          LICENSE_ISSUE_DATE as string,",
 				"          LICENSE_NUMBER as string,",
@@ -76,21 +82,113 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     format: 'table') ~> STAGE",
+				"     format: 'table') ~> LICENSESTAGE",
 				"source(output(",
-				"          RN_ID as string,",
-				"          DT as string",
+				"          LOCATION_SK as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          STATE_ABBR as string,",
+				"          ZIP as string,",
+				"          DI_JOB_ID as string,",
+				"          DI_LOAD_DATE as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> locationDim",
+				"source(output(",
+				"          BREED_SK as string,",
+				"          SPECIES_NAME as string,",
+				"          PRIMARY_SPECIES_NAME as string,",
+				"          SECONDARY_BREED_NAME as string,",
+				"          DI_JOB_ID as string,",
+				"          DI_LOAD_DT as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> BREEDDIM",
+				"source(output(",
+				"          DT as string,",
+				"          ABRV_DAY_NAME as string,",
+				"          MONTH_NAME as string,",
+				"          START_DAY_OF_MONTH as string,",
+				"          END_DAY_OF_MONTH as string,",
+				"          QUARTER_NUM as string,",
+				"          DAY_OF_WEEK as string,",
+				"          IS_WEEKEND as string,",
+				"          YEAR_NUM as string,",
+				"          MONTH_NUM as string,",
+				"          DAY_NUM as string,",
+				"          DATE_DIM_SK as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> DATEDIM",
-				"STAGE, BREEDDIM join(PRIMARY_BREED == PRIMARY_SPECIES_NAME",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false) ~> source1",
+				"LICENSESTAGE, BREEDDIM join(PRIMARY_BREED == PRIMARY_SPECIES_NAME",
 				"     && SECONDARY_BREED == SECONDARY_BREED_NAME",
 				"     && SPECIES == SPECIES_NAME,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join1"
+				"     broadcast: 'auto')~> join1",
+				"join1, locationDim join(LICENSE_NUMBER == ERROR_FUNCTION(''),",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join2, DATEDIM join(LICENSE_ISSUE_DATE == DT,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join3",
+				"join3, source1 join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join4",
+				"join4 select(mapColumn(",
+				"          BREED_SK,",
+				"          LOCATION_SK,",
+				"          DATE_DIM_SK,",
+				"          PET_LIC_SK = MAX_LIC,",
+				"          DI_JOB_ID = locationDim@DI_JOB_ID,",
+				"          DI_LOAD_DT = locationDim@DI_LOAD_DT",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 keyGenerate(output(RowNum as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 derive(PET_LIC_SK = PET_LIC_SK+RowNum) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          PET_LIC_SK as string,",
+				"          DATE_SK as string,",
+				"          LOCATION_SK as string,",
+				"          BREED_SK as string,",
+				"          LIC_NUM as string,",
+				"          DI_JOB_ID as string,",
+				"          DI_LOAD_DATE as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true,",
+				"     mapColumn(",
+				"          PET_LIC_SK,",
+				"          DATE_SK = DATE_DIM_SK,",
+				"          LOCATION_SK,",
+				"          BREED_SK,",
+				"          DI_JOB_ID,",
+				"          DI_LOAD_DATE = DI_LOAD_DT",
+				"     )) ~> sink1"
 			]
 		}
 	}
