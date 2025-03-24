@@ -1,5 +1,5 @@
 {
-	"name": "LATE_ARRIVAL1",
+	"name": "LATE_ARRIVAL_FACT",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {

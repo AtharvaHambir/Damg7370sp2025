@@ -1,5 +1,5 @@
 {
-	"name": "LATE_ARRIVAL2",
+	"name": "LATE_ARRIVAL_DIM2",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
