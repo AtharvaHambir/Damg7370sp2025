@@ -63,7 +63,15 @@
 				"     upsertable:false,",
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          CUSTOMER_SK = customer_sk,",
+				"          CUSTOMER_ID = customerid,",
+				"          CUSTOMER_NAME = CustomerName,",
+				"          BILLTO = billTo,",
+				"          DI_CREATEDDT = DI_CreatedDt,",
+				"          PID = pid",
+				"     )) ~> sink1"
 			]
 		}
 	}
